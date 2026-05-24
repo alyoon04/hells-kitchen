@@ -1,12 +1,11 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { repository } from "./db/repository.js";
-import {
-  NotFoundError,
-  getRecipeDetail,
-  searchRecipes,
-} from "./services/recipes.js";
-import { RecipeQuerySchema } from "./types/schemas.js";
+import { BadRequestError } from "./errors.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { validateQuery } from "./middleware/validate.js";
+import { getRecipeDetail, searchRecipes } from "./services/recipes.js";
+import { RecipeQuerySchema, type RecipeQuery } from "./types/schemas.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
@@ -14,20 +13,14 @@ const PORT = Number(process.env.PORT) || 8080;
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/recipes", (req: Request, res: Response) => {
-  const parsed = RecipeQuerySchema.safeParse(req.query);
-  if (!parsed.success) {
-    res.status(400).json({
-      error: {
-        code: "INVALID_QUERY",
-        message: "Invalid query parameters",
-        details: parsed.error.format(),
-      },
-    });
-    return;
-  }
-  res.json(searchRecipes(parsed.data));
-});
+app.get(
+  "/api/recipes",
+  validateQuery(RecipeQuerySchema),
+  (_req: Request, res: Response) => {
+    const query = res.locals.query as RecipeQuery;
+    res.json(searchRecipes(query));
+  },
+);
 
 app.get("/api/ingredients", (_req: Request, res: Response) => {
   res.json(repository.getAllIngredients());
@@ -40,26 +33,13 @@ app.get("/api/tags", (_req: Request, res: Response) => {
 app.get("/api/recipes/:id", (req: Request, res: Response) => {
   const id = req.params.id;
   if (typeof id !== "string" || id.length === 0) {
-    res
-      .status(400)
-      .json({ error: { code: "INVALID_ID", message: "id is required" } });
-    return;
+    throw new BadRequestError("id is required");
   }
-  try {
-    res.json(getRecipeDetail(id));
-  } catch (err) {
-    if (err instanceof NotFoundError) {
-      res
-        .status(404)
-        .json({ error: { code: "NOT_FOUND", message: err.message } });
-      return;
-    }
-    console.error(err);
-    res
-      .status(500)
-      .json({ error: { code: "INTERNAL", message: "Internal server error" } });
-  }
+  res.json(getRecipeDetail(id));
 });
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

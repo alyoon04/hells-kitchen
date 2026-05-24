@@ -1,4 +1,5 @@
 import { repository } from "../db/repository.js";
+import { NotFoundError } from "../errors.js";
 import {
   RecipeDetailSchema,
   RecipeSummarySchema,
@@ -9,13 +10,6 @@ import {
   type RecipeQuery,
   type RecipeSummary,
 } from "../types/schemas.js";
-
-export class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NotFoundError";
-  }
-}
 
 const DIFFICULTY_ORDER: Record<Recipe["difficulty"], number> = {
   easy: 0,

@@ -25,6 +25,21 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: backend error middleware + centralized validation
+- New `src/errors.ts` defines the error hierarchy:
+  - `HttpError` (base; carries `status`, `code`, `message`).
+  - `NotFoundError` (404, `NOT_FOUND`).
+  - `BadRequestError` (400, `BAD_REQUEST`, optional `details`).
+- New `src/middleware/errorHandler.ts`:
+  - `notFoundHandler` — catches unmatched routes with `{ code: "NOT_FOUND", message: "Route not found: METHOD /path" }`.
+  - `errorHandler` — handles ZodError (400 VALIDATION_ERROR with `.format()` details), HttpError (uses subclass status/code/message), default (500 INTERNAL + console.error).
+- New `src/middleware/validate.ts`:
+  - `validateQuery(schema)` parses `req.query`, stores typed result on `res.locals.query`, forwards ZodError to next() on failure.
+- `services/recipes.ts` now imports `NotFoundError` from `errors.ts` (was locally defined).
+- Refactored `server.ts`: handlers are thin — no inline try/catch, no inline 400/404. Express 4 catches sync throws and routes them to `errorHandler`.
+- Response envelope is now consistent across all error paths: `{ error: { code, message, details? } }`.
+- Verified: list, detail, invalid query (400), missing recipe (404), bogus route (404) — all return the envelope correctly.
+
 ### Commit: GET /api/ingredients and /api/tags
 - `GET /api/ingredients` → returns the full ingredient lookup array (46 items). Frontend filter UI uses `id` + `name`.
 - `GET /api/tags` → returns the sorted, deduped tag list derived from all recipes (22 tags).
