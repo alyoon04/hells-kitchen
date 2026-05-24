@@ -97,7 +97,7 @@ export function FilterBar({
   }
 
   return (
-    <div className="space-y-4 mb-6 rounded-lg border p-4 bg-card">
+    <div className="space-y-4 mb-6 rounded-2xl border border-border/40 p-4 bg-card shadow-md">
       <div className="grid gap-3 sm:grid-cols-4">
         <input
           className="border rounded-md px-3 py-2 text-sm bg-background sm:col-span-2"

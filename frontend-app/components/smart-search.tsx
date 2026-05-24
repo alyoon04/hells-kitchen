@@ -71,7 +71,7 @@ export function SmartSearch() {
   }
 
   return (
-    <div className="mb-4 rounded-lg border bg-card p-4">
+    <div className="mb-4 rounded-2xl border border-border/40 bg-card shadow-md p-4">
       <form onSubmit={onSubmit} className="flex flex-wrap gap-2">
         <label htmlFor="smart-search" className="sr-only">
           Describe what you&apos;re looking for

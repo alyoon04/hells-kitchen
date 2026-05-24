@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Link from "next/link";
+import { TopNav } from "@/components/top-nav";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -18,31 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans antialiased">
-        <nav className="border-b">
-          <div className="container mx-auto px-4 h-12 flex items-center gap-6 text-sm">
-            <Link href="/recipes" className="font-semibold">
-              Recipes
-            </Link>
-            <Link
-              href="/favorites"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Favorites
-            </Link>
-            <Link
-              href="/shopping-list"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Shopping list
-            </Link>
-            <Link
-              href="/cook"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Cook from pantry
-            </Link>
+        <header className="border-b">
+          <div className="container mx-auto px-4 py-3 flex justify-center sm:justify-start">
+            <TopNav />
           </div>
-        </nav>
+        </header>
         {children}
       </body>
     </html>

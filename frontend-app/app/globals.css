@@ -54,6 +54,23 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(
+        circle at 15% 0%,
+        rgba(59, 130, 246, 0.08) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 85% 100%,
+        rgba(168, 85, 247, 0.08) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 50% 50%,
+        rgba(244, 114, 182, 0.05) 0%,
+        transparent 60%
+      );
   }
 }

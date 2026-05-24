@@ -15,7 +15,7 @@ import type { RecipeSummary } from "@/lib/types";
 export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
   return (
     <Link href={`/recipes/${recipe.id}`} className="block">
-      <Card className="h-full transition hover:shadow-md">
+      <Card className="h-full transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:border-border/60">
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-lg">{recipe.title}</CardTitle>
