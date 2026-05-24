@@ -94,6 +94,33 @@ export const SuggestResponseSchema = z.object({
 });
 export type SuggestResponse = z.infer<typeof SuggestResponseSchema>;
 
+export const ParseQueryRequestSchema = z.object({
+  text: z
+    .string()
+    .min(1, "text is required")
+    .max(500, "text must be 500 characters or fewer"),
+});
+export type ParseQueryRequest = z.infer<typeof ParseQueryRequestSchema>;
+
+const SortKeySchema = z.enum([
+  "title",
+  "prepTime",
+  "cookTime",
+  "difficulty",
+  "dateAdded",
+]);
+
+export const ParsedQuerySchema = z.object({
+  q: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  ingredients: z.array(z.string()).optional(),
+  diet: z.array(z.string()).optional(),
+  difficulty: DifficultySchema.optional(),
+  sort: SortKeySchema.optional(),
+  order: z.enum(["asc", "desc"]).optional(),
+});
+export type ParsedQuery = z.infer<typeof ParsedQuerySchema>;
+
 export const RecipeQuerySchema = z.object({
   q: z.string().optional(),
   tags: z

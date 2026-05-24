@@ -58,6 +58,19 @@ export const SuggestResponseSchema = z.object({
 });
 export type SuggestResponse = z.infer<typeof SuggestResponseSchema>;
 
+export const ParsedQuerySchema = z.object({
+  q: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  ingredients: z.array(z.string()).optional(),
+  diet: z.array(z.string()).optional(),
+  difficulty: DifficultySchema.optional(),
+  sort: z
+    .enum(["title", "prepTime", "cookTime", "difficulty", "dateAdded"])
+    .optional(),
+  order: z.enum(["asc", "desc"]).optional(),
+});
+export type ParsedQuery = z.infer<typeof ParsedQuerySchema>;
+
 export const RecipeDetailSchema = RecipeSummarySchema.extend({
   ingredients: z.array(HydratedIngredientSchema),
   instructions: z.array(z.string()),

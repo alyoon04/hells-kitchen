@@ -1,5 +1,6 @@
 import { FilterBar } from "@/components/filter-bar";
 import { RecipeCard } from "@/components/recipe-card";
+import { SmartSearch } from "@/components/smart-search";
 import {
   getIngredients,
   getRecipes,
@@ -78,6 +79,7 @@ export default async function RecipesPage({
         </p>
       </header>
 
+      <SmartSearch />
       <FilterBar tags={allTags} ingredients={allIngredients} />
 
       {recipes.length === 0 ? (

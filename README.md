@@ -116,6 +116,7 @@ Good luck! We're excited to see your implementation.
 - ✅ Recipe scaling (servings slider on detail page — scales ingredient amounts + nutrition total in real time, including fractional amounts like `1/3`).
 - ✅ Sorting options.
 - ✅ LLM "Cook from pantry" — pick ingredients you have, Claude ranks recipes with reasoning.
+- ✅ LLM "Smart search" on `/recipes` — type a natural-language query like *"quick vegan italian"* and Claude returns structured filter params that get applied to the URL.
 - ✅ TypeScript throughout (strict mode), Zod-validated request/response shapes.
 - ✅ Loading skeletons, error boundaries, empty states, root + route-scoped 404s.
 - ✅ Responsive layout (cards stack on mobile, detail grid collapses, scaling controls wrap).

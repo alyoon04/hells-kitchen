@@ -6,9 +6,11 @@ import { BadRequestError } from "./errors.js";
 import { asyncHandler } from "./middleware/asyncHandler.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { validateQuery } from "./middleware/validate.js";
+import { parseQuery } from "./services/parse-query.js";
 import { getRecipeDetail, searchRecipes } from "./services/recipes.js";
 import { suggestRecipes } from "./services/suggest.js";
 import {
+  ParseQueryRequestSchema,
   RecipeQuerySchema,
   SuggestRequestSchema,
   type RecipeQuery,
@@ -51,6 +53,16 @@ app.post(
     const parsed = SuggestRequestSchema.safeParse(req.body);
     if (!parsed.success) throw parsed.error;
     const result = await suggestRecipes(parsed.data);
+    res.json(result);
+  }),
+);
+
+app.post(
+  "/api/parse-query",
+  asyncHandler(async (req: Request, res: Response) => {
+    const parsed = ParseQueryRequestSchema.safeParse(req.body);
+    if (!parsed.success) throw parsed.error;
+    const result = await parseQuery(parsed.data);
     res.json(result);
   }),
 );

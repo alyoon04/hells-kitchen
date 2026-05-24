@@ -25,6 +25,14 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: LLM natural-language filter (Smart search)
+- Backend `POST /api/parse-query` ({ text }) → `ParsedQuery` (all fields optional). Calls Claude Haiku 4.5 with a strict-JSON system prompt + a `cache_control: ephemeral` block holding the full allowed vocabulary (tags, ingredient {id,name}, diets, difficulties, sorts). Heuristics in the prompt: "quick"/"fast" → sort=prepTime asc, "easy" → difficulty=easy, etc.
+- `services/parse-query.ts` also runs a defensive `sanitize()` pass that drops any tags/ingredients/diets not in the allowed set — so a model hallucination can't poison the filter URL.
+- Schemas: `ParseQueryRequestSchema` (text 1–500 chars) + `ParsedQuerySchema` added to `types/schemas.ts`. Mirrored into `frontend-app/lib/types.ts`.
+- Frontend `parseNaturalQuery(text)` in `lib/api.ts`, then `components/smart-search.tsx` — input + submit, "Parsing…" disabled state, error banner, "Applied — …" summary line. On success builds URLSearchParams and `router.push("/recipes?…")`, which the existing FilterBar then reflects (single source of truth: URL).
+- Rendered above the FilterBar on `/recipes`.
+- Live-verified four prompts: "quick vegan italian" → `{tags:[italian,vegan], sort:prepTime asc}`; "easy salmon dish" → `{ingredients:[salmon_fillet], difficulty:easy}`; "hard recipes I can make with chicken" → `{ingredients:[chicken_breast], difficulty:hard}`; empty text → 400 with validation envelope.
+
 ### Commit: shopping list generator
 - Pre-work: extracted the localStorage Set hook into `lib/use-storage-set.ts` (generic `useStorageSet(key)` returning `{ value, has, toggle, clear, mounted }`). `lib/use-favorites.ts` is now a 1-liner over it; `lib/use-shopping-list.ts` mirrors it with key `recipe-shopping-list`. The previous setState-during-render bug fix (compute next outside the updater, side-effect after) lives in the shared hook now.
 - `lib/aggregate.ts` — pure functions:

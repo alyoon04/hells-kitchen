@@ -1,11 +1,13 @@
 import { z } from "zod";
 import {
   IngredientSchema,
+  ParsedQuerySchema,
   RecipeDetailSchema,
   RecipeSummarySchema,
   SuggestResponseSchema,
   type Difficulty,
   type Ingredient,
+  type ParsedQuery,
   type RecipeDetail,
   type RecipeSummary,
   type SuggestResponse,
@@ -101,6 +103,31 @@ export function getTags(): Promise<string[]> {
 export interface SuggestInput {
   ingredients: string[];
   dietary?: string[];
+}
+
+export async function parseNaturalQuery(text: string): Promise<ParsedQuery> {
+  const res = await fetch(`${API_URL}/api/parse-query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let code = "HTTP_ERROR";
+    let message = res.statusText || `Request failed with status ${res.status}`;
+    try {
+      const body = (await res.json()) as {
+        error?: { code?: string; message?: string };
+      };
+      if (body.error?.code) code = body.error.code;
+      if (body.error?.message) message = body.error.message;
+    } catch {
+      // body wasn't JSON; keep defaults
+    }
+    throw new ApiError(res.status, code, message);
+  }
+  const json: unknown = await res.json();
+  return ParsedQuerySchema.parse(json);
 }
 
 export async function suggestRecipes(
