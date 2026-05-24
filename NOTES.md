@@ -25,6 +25,17 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: /recipes/[id] detail page
+- `app/recipes/[id]/page.tsx` — server component. Awaits `params` (Promise in Next 15), calls `getRecipe(id)`. Catches `ApiError` with status 404 and calls Next's `notFound()` → renders `not-found.tsx`.
+- Layout: back link, header (title + difficulty pill, description, meta line, tag badges), then a 2-column grid on `md+` (left: ingredients + instructions, right: nutrition card; stacks on mobile).
+- `components/ingredient-list.tsx` — bordered list, name left + amount/unit right with `tabular-nums`.
+- `components/nutrition-card.tsx` — shadcn `Card` showing per-serving calories/protein/carbs/fat, with a footer line summarizing total for N servings.
+- Instructions: numbered list with circular step badges (uses `bg-secondary` from shadcn).
+- `app/recipes/[id]/loading.tsx` — skeleton matching the page layout.
+- `app/recipes/[id]/not-found.tsx` — clean 404 with a "Back to recipes" link.
+- `app/recipes/[id]/error.tsx` — client error boundary with `reset()` + "Back to recipes" buttons.
+- Verified end-to-end: `/recipes/1` renders Margherita with all 5 ingredients (incl. placeholder "Basil") + 5 numbered steps + nutrition card (220 kcal/serving, 880 kcal total); `/recipes/999` renders the not-found page.
+
 ### Commit: search + filter bar
 - `components/filter-bar.tsx` — client component, single source of truth: the URL.
   - Text search (debounced 300ms, `useEffect` + setTimeout, skipped on initial render via `isFirstRender` ref).
