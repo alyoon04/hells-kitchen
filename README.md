@@ -119,6 +119,7 @@ Good luck! We're excited to see your implementation.
 - ✅ TypeScript throughout (strict mode), Zod-validated request/response shapes.
 - ✅ Loading skeletons, error boundaries, empty states, root + route-scoped 404s.
 - ✅ Responsive layout (cards stack on mobile, detail grid collapses, scaling controls wrap).
+- ✅ Vitest test suite (29 tests) covering `searchRecipes`, `getRecipeDetail`, and `scaleAmount` — run with `npm test` in either app.
 
 ### Assumptions
 - **Nutrition portion**: `data.json` doesn't specify a portion unit on nutrition values. We sum nutrition across the recipe's ingredients (1 entry per ingredient), then divide by `servings` for per-serving. We don't multiply by `amount` because units are heterogeneous (cups / leaves / tbsp / oz).
@@ -138,7 +139,6 @@ Good luck! We're excited to see your implementation.
 - Shopping list across selected recipes (group by ingredient id + unit; mismatched units listed separately).
 - Recipe images (Unsplash by tag).
 - LLM: streaming response, "find more like this" on a recipe page.
-- Vitest tests for `searchRecipes`, `getRecipeDetail`, and `scaleAmount` (highest-signal pure functions).
 - Tighten CORS to the deployed frontend origin only.
 - Real DB if the dataset grew (Postgres + Drizzle).
 

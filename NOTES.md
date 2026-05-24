@@ -25,6 +25,16 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: Vitest suite for pure functions
+- Added Vitest to both apps (`npm test` / `npm run test:watch`). Minimal `vitest.config.ts` in each — `node` environment, scoped includes (`src/**/*.test.ts` backend, `lib/**/*.test.ts` frontend).
+- **Backend** (`backend-app/src/services/`):
+  - `recipes.test.ts` — 12 cases for `searchRecipes`: default sort, text query (case-insensitive), tags/ingredients/diet AND semantics, difficulty exact match, diet+difficulty combination, sort by prepTime/difficulty/dateAdded, payload shape (no ingredients/instructions on summary), empty-result fallthrough.
+  - `getRecipeDetail.test.ts` — 6 cases: `NotFoundError` on missing id, ingredient hydration from lookup, placeholder for missing-from-lookup ids (humanized name + zero nutrition), `nutrition.total` sum (placeholder contributes 0), `nutrition.perServing = total / servings` with 1-decimal rounding, recipe metadata preserved.
+  - Repository swapped with `vi.mock("../db/repository.js", ...)` driven by `vi.hoisted` fixtures (vi.mock hoists above `const` declarations, so the factory can't close over module-scope consts directly).
+- **Frontend** (`frontend-app/lib/scaling.test.ts`) — 11 cases for `scaleAmount` + `formatAmount`: integer/decimal/fraction inputs, whitespace in fractions (`"1 / 2"`), factor=1 returns original unchanged, non-numeric fallback (`"pinch ×2"`), divide-by-zero in fraction parsing.
+- Switched test files to static `import { ... } from "./recipes.js"` after `vi.mock` (Vitest auto-hoists mock calls, so `await import` is unnecessary and broke `npm run typecheck` under NodeNext CJS).
+- Verified: `npm test` green in both apps (29 total); `npm run typecheck` clean in both.
+
 ### Commit: docs + deploy hints
 - README updated:
   - Fixed setup paths (`backend` → `backend-app`, `frontend` → `frontend-app`) and added explicit `.env` copy step.
