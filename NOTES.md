@@ -25,6 +25,11 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: GET /api/ingredients and /api/tags
+- `GET /api/ingredients` → returns the full ingredient lookup array (46 items). Frontend filter UI uses `id` + `name`.
+- `GET /api/tags` → returns the sorted, deduped tag list derived from all recipes (22 tags).
+- Both endpoints back the filter dropdowns / multi-selects on `/recipes`.
+
 ### Commit: GET /api/recipes/:id with hydrated ingredients + nutrition
 - Added `getRecipeDetail(id)` to `services/recipes.ts`:
   - Hydrates each `RecipeIngredient` by merging with the ingredient lookup → `HydratedIngredient` (id, name, category, amount, unit, allergens, dietary, nutrition).

@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import { repository } from "./db/repository.js";
 import {
   NotFoundError,
   getRecipeDetail,
@@ -26,6 +27,14 @@ app.get("/api/recipes", (req: Request, res: Response) => {
     return;
   }
   res.json(searchRecipes(parsed.data));
+});
+
+app.get("/api/ingredients", (_req: Request, res: Response) => {
+  res.json(repository.getAllIngredients());
+});
+
+app.get("/api/tags", (_req: Request, res: Response) => {
+  res.json(repository.getAllTags());
 });
 
 app.get("/api/recipes/:id", (req: Request, res: Response) => {
