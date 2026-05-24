@@ -25,6 +25,16 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: recipe scaling
+- `lib/scaling.ts` — pure helpers:
+  - `scaleAmount(raw, factor)` handles integers, decimals, and fractions (`"1/3" × 2 = "0.67"`). Falls back to `original ×factor` for non-numeric amounts ("pinch of salt" stays readable).
+  - `formatAmount(n)` trims trailing zeros + rounds to 2 decimals.
+  - Verified with 6 unit cases (integer, decimal, two fraction forms, fraction-of, multiplier ≠ 1).
+- `components/recipe-body.tsx` — new client island; owns `servings` state (default = recipe.servings). Derives `scaledIngredients` and `scaledTotal` via `useMemo`.
+- Page restructure: server component renders the header (title/description/tags/prep+cook), client `RecipeBody` renders the controls + grid (ingredients, instructions, nutrition). Instructions live inside the client component for layout, but don't re-render on scale changes.
+- Controls UI: `−` / number input / `+` row with a "Reset to N" link when current ≠ base. Bounded 1–99.
+- Per-serving nutrition is invariant; only the total + ingredient amounts scale. No network round-trip on scale change.
+
 ### Commit: /recipes/[id] detail page
 - `app/recipes/[id]/page.tsx` — server component. Awaits `params` (Promise in Next 15), calls `getRecipe(id)`. Catches `ApiError` with status 404 and calls Next's `notFound()` → renders `not-found.tsx`.
 - Layout: back link, header (title + difficulty pill, description, meta line, tag badges), then a 2-column grid on `md+` (left: ingredients + instructions, right: nutrition card; stacks on mobile).
