@@ -76,6 +76,24 @@ export const DataFileSchema = z.object({
 });
 export type DataFile = z.infer<typeof DataFileSchema>;
 
+export const SuggestRequestSchema = z.object({
+  ingredients: z.array(z.string()).min(1, "At least one ingredient is required"),
+  dietary: z.array(z.string()).optional().default([]),
+});
+export type SuggestRequest = z.infer<typeof SuggestRequestSchema>;
+
+export const SuggestMatchSchema = z.object({
+  recipe: RecipeSummarySchema,
+  score: z.number().min(0).max(1),
+  reasoning: z.string(),
+});
+export type SuggestMatch = z.infer<typeof SuggestMatchSchema>;
+
+export const SuggestResponseSchema = z.object({
+  matches: z.array(SuggestMatchSchema),
+});
+export type SuggestResponse = z.infer<typeof SuggestResponseSchema>;
+
 export const RecipeQuerySchema = z.object({
   q: z.string().optional(),
   tags: z

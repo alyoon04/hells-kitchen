@@ -3,10 +3,12 @@ import {
   IngredientSchema,
   RecipeDetailSchema,
   RecipeSummarySchema,
+  SuggestResponseSchema,
   type Difficulty,
   type Ingredient,
   type RecipeDetail,
   type RecipeSummary,
+  type SuggestResponse,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
@@ -94,4 +96,36 @@ export function getIngredients(): Promise<Ingredient[]> {
 
 export function getTags(): Promise<string[]> {
   return request("/api/tags", z.array(z.string()));
+}
+
+export interface SuggestInput {
+  ingredients: string[];
+  dietary?: string[];
+}
+
+export async function suggestRecipes(
+  input: SuggestInput,
+): Promise<SuggestResponse> {
+  const res = await fetch(`${API_URL}/api/suggest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let code = "HTTP_ERROR";
+    let message = res.statusText || `Request failed with status ${res.status}`;
+    try {
+      const body = (await res.json()) as {
+        error?: { code?: string; message?: string };
+      };
+      if (body.error?.code) code = body.error.code;
+      if (body.error?.message) message = body.error.message;
+    } catch {
+      // body wasn't JSON; keep defaults
+    }
+    throw new ApiError(res.status, code, message);
+  }
+  const json: unknown = await res.json();
+  return SuggestResponseSchema.parse(json);
 }

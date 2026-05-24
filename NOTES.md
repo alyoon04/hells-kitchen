@@ -25,6 +25,22 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: LLM "cook from pantry" feature
+- Backend:
+  - Installed `@anthropic-ai/sdk`.
+  - Added `SuggestRequestSchema` (ingredients[] min 1, optional dietary[]) and `SuggestResponseSchema` (matches[] of {recipe, score, reasoning}) to schemas.ts.
+  - New `services/suggest.ts`: builds a system prompt with strict JSON instructions + a `cache_control: ephemeral` block holding the recipe corpus (id/title/tags/ingredientIds only — trimmed for prompt cost). Calls `claude-haiku-4-5-20251001`. Strips code fences if present, JSON-parses, validates against `ModelOutputSchema`, then hydrates `recipeId` → `RecipeSummary` from the in-memory repo before returning.
+  - Missing API key → `BadRequestError` so the rest of the app keeps working.
+  - New `middleware/asyncHandler.ts` wraps async route handlers so promise rejections forward to `errorHandler` (Express 4 doesn't catch async throws natively).
+  - `POST /api/suggest` route wired with the async handler.
+- Frontend:
+  - Mirrored `SuggestMatchSchema` and `SuggestResponseSchema` into `lib/types.ts`.
+  - Added `suggestRecipes(input)` POST helper to `lib/api.ts` (Zod-validates the response).
+  - `app/cook/page.tsx` — server shell, fetches ingredients, renders `<CookForm>`.
+  - `components/cook-form.tsx` — client form: ingredient and diet pill multiselects, submit button ("Asking Claude..." loading state), error banner, results grid (recipe card per match with score percentage + reasoning, links to detail page).
+  - Updated `app/layout.tsx` with a minimal top nav (Recipes | Cook from pantry).
+- Live test: `POST /api/suggest {"ingredients":["tomato"]}` returned 2 matches (Margherita 20%, Greek Salad 20%) with model-written reasoning. Empty `ingredients` array correctly returns `400 VALIDATION_ERROR`.
+
 ### Commit: recipe scaling
 - `lib/scaling.ts` — pure helpers:
   - `scaleAmount(raw, factor)` handles integers, decimals, and fractions (`"1/3" × 2 = "0.67"`). Falls back to `original ×factor` for non-numeric amounts ("pinch of salt" stays readable).

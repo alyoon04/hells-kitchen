@@ -2,10 +2,16 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { repository } from "./db/repository.js";
 import { BadRequestError } from "./errors.js";
+import { asyncHandler } from "./middleware/asyncHandler.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { validateQuery } from "./middleware/validate.js";
 import { getRecipeDetail, searchRecipes } from "./services/recipes.js";
-import { RecipeQuerySchema, type RecipeQuery } from "./types/schemas.js";
+import { suggestRecipes } from "./services/suggest.js";
+import {
+  RecipeQuerySchema,
+  SuggestRequestSchema,
+  type RecipeQuery,
+} from "./types/schemas.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
@@ -37,6 +43,16 @@ app.get("/api/recipes/:id", (req: Request, res: Response) => {
   }
   res.json(getRecipeDetail(id));
 });
+
+app.post(
+  "/api/suggest",
+  asyncHandler(async (req: Request, res: Response) => {
+    const parsed = SuggestRequestSchema.safeParse(req.body);
+    if (!parsed.success) throw parsed.error;
+    const result = await suggestRecipes(parsed.data);
+    res.json(result);
+  }),
+);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
