@@ -1,6 +1,9 @@
+import { FilterBar } from "@/components/filter-bar";
 import { RecipeCard } from "@/components/recipe-card";
 import {
+  getIngredients,
   getRecipes,
+  getTags,
   type RecipeQuery,
   type SortKey,
 } from "@/lib/api";
@@ -60,7 +63,11 @@ export default async function RecipesPage({
     order: parseOrder(params.order),
   };
 
-  const recipes = await getRecipes(query);
+  const [recipes, allTags, allIngredients] = await Promise.all([
+    getRecipes(query),
+    getTags(),
+    getIngredients(),
+  ]);
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -70,6 +77,8 @@ export default async function RecipesPage({
           {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
         </p>
       </header>
+
+      <FilterBar tags={allTags} ingredients={allIngredients} />
 
       {recipes.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">

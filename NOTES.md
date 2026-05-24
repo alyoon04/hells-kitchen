@@ -25,6 +25,17 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: search + filter bar
+- `components/filter-bar.tsx` — client component, single source of truth: the URL.
+  - Text search (debounced 300ms, `useEffect` + setTimeout, skipped on initial render via `isFirstRender` ref).
+  - Difficulty: native `<select>` (single).
+  - Sort + order: `<select>` + `↑/↓` toggle button.
+  - Diet, tags, ingredients: clickable `Badge` pills, multi-select (AND semantics on backend). Ingredients collapsed inside `<details>` with selection count (46 items would be too noisy expanded by default).
+  - "Clear all filters" link appears only when any filter is active.
+- State flow: badge click → `update()` mutates a fresh `URLSearchParams` → `router.replace(?qs)` inside `startTransition` → server component re-runs with new `searchParams` → fetches filtered recipes → streams in new HTML. Filter bar stays mounted; pill selected-state re-derives from `useSearchParams()`.
+- `page.tsx` now fetches `[recipes, tags, ingredients]` in parallel via `Promise.all` and passes the latter two to `FilterBar`.
+- Verified: filter bar renders all controls, `?tags=italian` returns 4, `?diet=vegan&difficulty=medium` returns 1.
+
 ### Commit: /recipes list page (server component)
 - `app/recipes/page.tsx` — server component, reads `searchParams` (Promise in Next 15), calls `getRecipes(query)`. Parses query string params back into typed `RecipeQuery` (split comma lists, narrow `difficulty`/`sort`/`order` enums).
 - `components/recipe-card.tsx` — title, description, difficulty pill (colored by easy/medium/hard), prep/cook/servings line, tag badges. Whole card is a `<Link>` to `/recipes/[id]`.
