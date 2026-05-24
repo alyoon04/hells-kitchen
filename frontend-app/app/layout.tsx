@@ -30,6 +30,12 @@ export default function RootLayout({
               Favorites
             </Link>
             <Link
+              href="/shopping-list"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Shopping list
+            </Link>
+            <Link
               href="/cook"
               className="text-muted-foreground hover:text-foreground"
             >

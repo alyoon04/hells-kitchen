@@ -25,6 +25,19 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: shopping list generator
+- Pre-work: extracted the localStorage Set hook into `lib/use-storage-set.ts` (generic `useStorageSet(key)` returning `{ value, has, toggle, clear, mounted }`). `lib/use-favorites.ts` is now a 1-liner over it; `lib/use-shopping-list.ts` mirrors it with key `recipe-shopping-list`. The previous setState-during-render bug fix (compute next outside the updater, side-effect after) lives in the shared hook now.
+- `lib/aggregate.ts` — pure functions:
+  - `parseNumericAmount(raw)` → number | null. Handles integers, decimals, fractions (`"1/2"`, `"1 / 4"`), divide-by-zero → null, non-numeric → null.
+  - `aggregateIngredients(recipes)` → `{ aggregated, nonNumeric }`. Groups by `(ingredientId, unit)` so `"2 cups tomato" + "3 cups tomato" → "5 cups tomato"` but `"1 cup flour" + "2 tbsp flour"` stays as two entries. Each aggregated item carries `sources: { recipeId, recipeTitle }[]` for traceability. Non-numeric amounts (`"pinch"`, `"to taste"`) get routed to a separate list with their source recipe (you can't sum "pinch" + "1 tsp"). Aggregated list is name-sorted.
+- `lib/aggregate.test.ts` — 11 cases for the two functions (mirror style of the existing scaling tests). Sum across recipes, unit mismatch, fraction sum, non-numeric routing, sort order, empty input.
+- `components/shopping-list-button.tsx` — basket SVG (emerald-600 when active). Same interaction shape as `FavoriteButton` (preventDefault + stopPropagation so the parent `<Link>` doesn't navigate, `aria-pressed` + dynamic `aria-label`).
+- Wired into `recipe-card.tsx` and `recipes/[id]/page.tsx` next to the favorite heart.
+- `app/shopping-list/page.tsx` — client route. Reads selected IDs from `useShoppingList`, fetches details in parallel via `Promise.all(getRecipe(id))`, aggregates with `aggregateIngredients`. Three sections: selected recipes (chips with × remove), aggregated ingredients (border-divided list with `tabular-nums`), and "Other items" (non-numeric, only rendered if any exist, with a short explanatory note). Empty / loading / error / clear-all all handled.
+- Nav link added to `app/layout.tsx`.
+- Servings: shopping list uses each recipe's *base* servings — does not pick up per-recipe scaling from the detail-page slider (that's component-local state, not persisted). Worth flagging in Candidate Notes if relevant.
+- Verified: typecheck clean both apps; 22 frontend tests + 18 backend tests = 40 green; `/shopping-list` returns 200; list page renders 15 baskets + 15 hearts; nav contains all 4 links.
+
 ### Commit: favorites (localStorage + /favorites view)
 - `lib/use-favorites.ts` — `useFavorites()` hook backed by `localStorage` key `recipe-favorites` (JSON-encoded string[]). Returns `{ favorites: Set<string>, isFavorite, toggle, mounted }`.
   - Starts with an empty Set to avoid SSR/CSR hydration mismatch; populates on mount and flips `mounted` to true (consumers gate their visual state on this).

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FavoriteButton } from "@/components/favorite-button";
+import { ShoppingListButton } from "@/components/shopping-list-button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -25,6 +26,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
                 {recipe.difficulty}
               </span>
               <FavoriteButton recipeId={recipe.id} size="sm" />
+              <ShoppingListButton recipeId={recipe.id} size="sm" />
             </div>
           </div>
           <CardDescription>{recipe.description}</CardDescription>

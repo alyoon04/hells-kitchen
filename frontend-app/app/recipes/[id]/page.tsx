@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
+import { ShoppingListButton } from "@/components/shopping-list-button";
 import { Badge } from "@/components/ui/badge";
 import { RecipeBody } from "@/components/recipe-body";
 import { ApiError, getRecipe } from "@/lib/api";
@@ -41,6 +42,7 @@ export default async function RecipeDetailPage({
               {recipe.difficulty}
             </span>
             <FavoriteButton recipeId={recipe.id} />
+            <ShoppingListButton recipeId={recipe.id} />
           </div>
         </div>
         <p className="text-muted-foreground mt-2">{recipe.description}</p>
