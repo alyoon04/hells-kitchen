@@ -20,33 +20,47 @@ const ROWS: ReadonlyArray<{ key: keyof Nutrition; label: string; unit: string }>
     { key: "fat", label: "Fat", unit: "g" },
   ];
 
+function NutritionRows({ values }: { values: Nutrition }) {
+  return (
+    <dl className="space-y-1.5">
+      {ROWS.map(({ key, label, unit }) => (
+        <div key={key} className="flex justify-between text-sm">
+          <dt className="text-muted-foreground">{label}</dt>
+          <dd className="font-medium tabular-nums">
+            {values[key]} {unit}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function NutritionCard({
   perServing,
   total,
   servings,
 }: NutritionCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Nutrition (per serving)</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <dl className="space-y-1.5">
-          {ROWS.map(({ key, label, unit }) => (
-            <div key={key} className="flex justify-between text-sm">
-              <dt className="text-muted-foreground">{label}</dt>
-              <dd className="font-medium tabular-nums">
-                {perServing[key]} {unit}
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <div className="pt-3 border-t text-xs text-muted-foreground">
-          Total for {servings}{" "}
-          {servings === 1 ? "serving" : "servings"}: {total.calories} kcal,{" "}
-          {total.protein}g protein
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Nutrition (per serving)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NutritionRows values={perServing} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            Total for {servings} {servings === 1 ? "serving" : "servings"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NutritionRows values={total} />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
