@@ -25,6 +25,22 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: add zod schemas (shared types)
+- Installed `zod` in both backend and frontend.
+- `backend-app/src/types/schemas.ts`:
+  - `DifficultySchema` (enum: easy/medium/hard).
+  - `NutritionSchema` (calories, protein, carbs, fat).
+  - `IngredientSchema` (lookup item: id, name, category, nutrition, allergens, dietary).
+  - `RecipeIngredientSchema` (embedded in recipe: ingredientId, amount, unit).
+  - `RecipeSchema` (raw recipe from data.json).
+  - `RecipeSummarySchema` (omits ingredients + instructions; used by list endpoint).
+  - `HydratedIngredientSchema` (merged lookup + embedded amount/unit).
+  - `RecipeDetailSchema` (recipe + hydrated ingredients + computed nutrition.total + nutrition.perServing).
+  - `DataFileSchema` (top-level shape for data.json validation at boot).
+  - `RecipeQuerySchema` (validates list endpoint query params — handles single/array/comma-separated forms for tags/ingredients/diet).
+- `frontend-app/lib/types.ts` mirrors the public-facing schemas the UI uses: `RecipeSummary`, `RecipeDetail`, `HydratedIngredient`, `Ingredient`, `Nutrition`, `Difficulty`.
+- Verified: typecheck clean on both apps.
+
 ### Commit: migrate frontend to typescript + tailwind + shadcn
 - Installed `typescript`, `@types/{react,react-dom,node}`, `tailwindcss@3`, `postcss`, `autoprefixer`, `tailwindcss-animate`, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react`.
 - Added `tsconfig.json` (strict, noUncheckedIndexedAccess, `@/*` paths).
