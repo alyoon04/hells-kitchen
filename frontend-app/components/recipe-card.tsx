@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FavoriteButton } from "@/components/favorite-button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -17,11 +18,14 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-lg">{recipe.title}</CardTitle>
-            <span
-              className={`shrink-0 rounded px-2 py-0.5 text-xs capitalize ${difficultyStyles[recipe.difficulty]}`}
-            >
-              {recipe.difficulty}
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span
+                className={`rounded px-2 py-0.5 text-xs capitalize ${difficultyStyles[recipe.difficulty]}`}
+              >
+                {recipe.difficulty}
+              </span>
+              <FavoriteButton recipeId={recipe.id} size="sm" />
+            </div>
           </div>
           <CardDescription>{recipe.description}</CardDescription>
         </CardHeader>

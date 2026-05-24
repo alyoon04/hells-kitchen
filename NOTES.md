@@ -25,6 +25,19 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: favorites (localStorage + /favorites view)
+- `lib/use-favorites.ts` — `useFavorites()` hook backed by `localStorage` key `recipe-favorites` (JSON-encoded string[]). Returns `{ favorites: Set<string>, isFavorite, toggle, mounted }`.
+  - Starts with an empty Set to avoid SSR/CSR hydration mismatch; populates on mount and flips `mounted` to true (consumers gate their visual state on this).
+  - Syncs across tabs via the native `storage` event AND across same-tab components via a custom `recipe-favorites-changed` window event dispatched on every write (the `storage` event doesn't fire in the same tab).
+  - Defensive JSON parse: malformed values return an empty set rather than throwing.
+- `components/favorite-button.tsx` — small client island. Inline heart SVG (filled red when active, outline + muted color otherwise). `aria-pressed` + dynamic `aria-label` ("Add to favorites" / "Remove from favorites"). `onClick` calls `e.preventDefault()` + `e.stopPropagation()` so the wrapping `<Link>` on `RecipeCard` doesn't navigate when the heart is tapped.
+- Wired into:
+  - `components/recipe-card.tsx` — next to the difficulty pill in the card header (size="sm").
+  - `app/recipes/[id]/page.tsx` — next to the difficulty pill in the detail header (size="md").
+- `app/favorites/page.tsx` — client route. Reads favorites from the hook, fetches `getRecipes()` once on mount, filters to the favorited subset. States: loading (skeleton grid), error (banner), empty (dashed-border card with link back to /recipes), populated (same grid as /recipes).
+- `app/layout.tsx` — added `Favorites` link to the nav between `Recipes` and `Cook from pantry`.
+- Verified via curl: `/favorites` → 200; SSR shows "Loading…" header before client hydrates (expected); `/recipes` HTML contains 15 favorite buttons; `/recipes/1` contains 1. Did not click hearts in a real browser — verified rendered HTML + state-machine logic only.
+
 ### Commit: Vitest suite for pure functions
 - Added Vitest to both apps (`npm test` / `npm run test:watch`). Minimal `vitest.config.ts` in each — `node` environment, scoped includes (`src/**/*.test.ts` backend, `lib/**/*.test.ts` frontend).
 - **Backend** (`backend-app/src/services/`):
