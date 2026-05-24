@@ -1,6 +1,10 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { searchRecipes } from "./services/recipes.js";
+import {
+  NotFoundError,
+  getRecipeDetail,
+  searchRecipes,
+} from "./services/recipes.js";
 import { RecipeQuerySchema } from "./types/schemas.js";
 
 const app = express();
@@ -22,6 +26,30 @@ app.get("/api/recipes", (req: Request, res: Response) => {
     return;
   }
   res.json(searchRecipes(parsed.data));
+});
+
+app.get("/api/recipes/:id", (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (typeof id !== "string" || id.length === 0) {
+    res
+      .status(400)
+      .json({ error: { code: "INVALID_ID", message: "id is required" } });
+    return;
+  }
+  try {
+    res.json(getRecipeDetail(id));
+  } catch (err) {
+    if (err instanceof NotFoundError) {
+      res
+        .status(404)
+        .json({ error: { code: "NOT_FOUND", message: err.message } });
+      return;
+    }
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: { code: "INTERNAL", message: "Internal server error" } });
+  }
 });
 
 app.listen(PORT, () => {

@@ -21,8 +21,21 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 - **Nutrition interpretation**: data.json has no portion unit on nutrition values. We sum nutrition across listed ingredients, then divide by `servings` for per-serving. Document explicitly in README.
 - **Shopping list units**: ingredients have heterogeneous units (cups, leaves, tbsp). When aggregating across recipes, group by ingredient id + unit; mismatched units listed separately.
+- **Missing ingredient lookups in data.json**: 8 ingredient IDs are referenced by recipes but not defined in the lookup table (basil, butter, brown_sugar, white_sugar, broccoli, carrot, soy_sauce, ginger). We render them with placeholder data (humanized name from the id, "unknown" category, zero nutrition) and skip them in nutrition totals. Boot logs a warning listing missing IDs.
 
 ## Implementation log
+
+### Commit: GET /api/recipes/:id with hydrated ingredients + nutrition
+- Added `getRecipeDetail(id)` to `services/recipes.ts`:
+  - Hydrates each `RecipeIngredient` by merging with the ingredient lookup → `HydratedIngredient` (id, name, category, amount, unit, allergens, dietary, nutrition).
+  - Missing lookup → placeholder (humanized name from id, "unknown" category, zero nutrition, empty arrays). Recipe still renders.
+  - `nutrition.total`: sum of all ingredient nutrition values.
+  - `nutrition.perServing`: total ÷ recipe.servings.
+  - Both rounded to 1 decimal place.
+  - Throws `NotFoundError` if recipe id is missing.
+- Repository now logs a boot warning listing any ingredient IDs referenced by recipes but missing from the lookup (currently 8: basil, butter, brown_sugar, white_sugar, broccoli, carrot, soy_sauce, ginger).
+- Server route `GET /api/recipes/:id` returns `RecipeDetail` or `404 { error: { code: "NOT_FOUND" } }`. Inline error handling for now — will centralize in commit 8.
+- Verified: Margherita Pizza returns 5 ingredients including placeholder "Basil"; 220 kcal/serving × 4 servings = 880 total (math checks); `/api/recipes/999` → 404.
 
 ### Commit: GET /api/recipes with search + filter + sort
 - New `src/services/recipes.ts` with `searchRecipes(query)`:

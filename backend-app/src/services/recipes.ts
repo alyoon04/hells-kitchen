@@ -1,10 +1,21 @@
 import { repository } from "../db/repository.js";
 import {
+  RecipeDetailSchema,
   RecipeSummarySchema,
+  type HydratedIngredient,
+  type Nutrition,
   type Recipe,
+  type RecipeDetail,
   type RecipeQuery,
   type RecipeSummary,
 } from "../types/schemas.js";
+
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
 
 const DIFFICULTY_ORDER: Record<Recipe["difficulty"], number> = {
   easy: 0,
@@ -15,6 +26,37 @@ const DIFFICULTY_ORDER: Record<Recipe["difficulty"], number> = {
 function parseMinutes(s: string): number {
   const n = parseInt(s, 10);
   return Number.isFinite(n) ? n : 0;
+}
+
+function round1(n: number): number {
+  return Math.round(n * 10) / 10;
+}
+
+function addNutrition(a: Nutrition, b: Nutrition): Nutrition {
+  return {
+    calories: a.calories + b.calories,
+    protein: a.protein + b.protein,
+    carbs: a.carbs + b.carbs,
+    fat: a.fat + b.fat,
+  };
+}
+
+function roundNutrition(n: Nutrition): Nutrition {
+  return {
+    calories: round1(n.calories),
+    protein: round1(n.protein),
+    carbs: round1(n.carbs),
+    fat: round1(n.fat),
+  };
+}
+
+function scaleNutrition(n: Nutrition, factor: number): Nutrition {
+  return {
+    calories: n.calories * factor,
+    protein: n.protein * factor,
+    carbs: n.carbs * factor,
+    fat: n.fat * factor,
+  };
 }
 
 function matchesQuery(recipe: Recipe, query: RecipeQuery): boolean {
@@ -85,4 +127,73 @@ export function searchRecipes(query: RecipeQuery): RecipeSummary[] {
   });
 
   return filtered.map((r) => RecipeSummarySchema.parse(r));
+}
+
+function humanize(id: string): string {
+  return id
+    .split("_")
+    .map((w) => (w.length > 0 ? w[0]!.toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+const ZERO_NUTRITION: Nutrition = {
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fat: 0,
+};
+
+export function getRecipeDetail(id: string): RecipeDetail {
+  const recipe = repository.getRecipeById(id);
+  if (!recipe) throw new NotFoundError(`Recipe not found: ${id}`);
+
+  const hydrated: HydratedIngredient[] = recipe.ingredients.map((ri) => {
+    const ing = repository.getIngredient(ri.ingredientId);
+    if (!ing) {
+      return {
+        id: ri.ingredientId,
+        name: humanize(ri.ingredientId),
+        category: "unknown",
+        amount: ri.amount,
+        unit: ri.unit,
+        commonAllergens: [],
+        dietary: [],
+        nutrition: ZERO_NUTRITION,
+      };
+    }
+    return {
+      id: ing.id,
+      name: ing.name,
+      category: ing.category,
+      amount: ri.amount,
+      unit: ri.unit,
+      commonAllergens: ing.commonAllergens,
+      dietary: ing.dietary,
+      nutrition: ing.nutrition,
+    };
+  });
+
+  const totalRaw = hydrated.reduce(
+    (acc, h) => addNutrition(acc, h.nutrition),
+    { ...ZERO_NUTRITION },
+  );
+  const perServingRaw = scaleNutrition(totalRaw, 1 / recipe.servings);
+
+  return RecipeDetailSchema.parse({
+    id: recipe.id,
+    title: recipe.title,
+    description: recipe.description,
+    servings: recipe.servings,
+    prepTime: recipe.prepTime,
+    cookTime: recipe.cookTime,
+    difficulty: recipe.difficulty,
+    tags: recipe.tags,
+    dateAdded: recipe.dateAdded,
+    ingredients: hydrated,
+    instructions: recipe.instructions,
+    nutrition: {
+      total: roundNutrition(totalRaw),
+      perServing: roundNutrition(perServingRaw),
+    },
+  });
 }

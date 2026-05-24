@@ -27,6 +27,16 @@ const ingredientMap = new Map<string, Ingredient>(
 );
 const tags = Array.from(new Set(data.recipes.flatMap((r) => r.tags))).sort();
 
+const referencedIds = new Set(
+  data.recipes.flatMap((r) => r.ingredients.map((i) => i.ingredientId)),
+);
+const missingIds = [...referencedIds].filter((id) => !ingredientMap.has(id));
+if (missingIds.length > 0) {
+  console.warn(
+    `[repository] ${missingIds.length} ingredient ID(s) referenced by recipes but not in lookup table: ${missingIds.join(", ")}. They will render with placeholder data and zero nutrition.`,
+  );
+}
+
 export const repository = {
   getAllRecipes: (): Recipe[] => data.recipes,
   getRecipeById: (id: string): Recipe | undefined => recipeMap.get(id),
