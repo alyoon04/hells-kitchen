@@ -25,6 +25,13 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: docs + deploy hints
+- README updated:
+  - Fixed setup paths (`backend` → `backend-app`, `frontend` → `frontend-app`) and added explicit `.env` copy step.
+  - Appended full **Candidate Notes** section: stack, implementation choices, completed features (core + bonus), assumptions (nutrition portion + missing ingredient lookups + AND-semantics filters), known limitations, what I'd add with more time, deploy guide for Vercel + Railway.
+- Added `"engines": { "node": ">=20" }` to both `package.json`s so Railway / Vercel pin a known runtime.
+- No `vercel.json` / `railway.json` written — both platforms auto-detect Next.js and Node + `npm run build` / `npm start`. Less config to maintain.
+
 ### Commit: polish (loading, errors, not-found, env loading)
 - Backend: added `import "dotenv/config"` at top of `server.ts` so `backend-app/.env` is loaded automatically on `npm run dev` / `start`. Previously the LLM key only worked if exported in shell env.
 - Frontend:
