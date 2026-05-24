@@ -13,7 +13,6 @@ A running log of notable decisions and changes. Source of truth for context acro
 ## Architecture decisions
 
 - **Two apps, not one Next.js fullstack**: scaffold separates `backend-app/` and `frontend-app/` deliberately — the assignment is partly a test of REST API design as a discrete artifact. Keeping them separate.
-- **Folder names**: kept `backend-app/` and `frontend-app/` (README says `backend/` / `frontend/`, will fix README in final docs commit).
 - **No TanStack Query**: list/detail are server components reading `searchParams`. Filter bar writes to URL → server re-renders. No client-side fetching needed for the main flow.
 - **No database**: 15 read-only recipes fit trivially in memory. Favorites/shopping list live in localStorage (per-user state).
 - **Zod schemas**: defined in backend, mirrored (copy) in frontend `lib/types.ts`. npm workspaces would be overkill.
@@ -24,6 +23,16 @@ A running log of notable decisions and changes. Source of truth for context acro
 - **Shopping list units**: ingredients have heterogeneous units (cups, leaves, tbsp). When aggregating across recipes, group by ingredient id + unit; mismatched units listed separately.
 
 ## Implementation log
+
+### Commit: backend in-memory repository
+- `backend-app/src/db/repository.ts`:
+  - Loads `data.json` once at boot via `fs.readFileSync`.
+  - Validates with `DataFileSchema.safeParse` — throws with logged details on failure (fail-fast).
+  - Builds `recipeMap` and `ingredientMap` for O(1) id lookups; derives sorted unique `tags`.
+  - Exposes: `getAllRecipes`, `getRecipeById`, `getAllIngredients`, `getIngredient`, `getAllTags`.
+- Refactored `server.ts` to use the repository instead of per-request `fs.readFile`. `/api/recipes` now returns `RecipeSummary[]` (drops `ingredients` + `instructions` from list payload — smaller wire size, leaner UI contract).
+- Local imports use `.js` extensions for NodeNext module resolution compatibility.
+- Verified: typecheck clean; `GET /api/recipes` returns 15 summary objects with `[id, title, description, servings, prepTime, cookTime, difficulty, tags, dateAdded]`.
 
 ### Commit: add zod schemas (shared types)
 - Installed `zod` in both backend and frontend.
