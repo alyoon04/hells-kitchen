@@ -9,7 +9,14 @@ import type { RecipeDetail } from "@/lib/types";
 export function RecipeBody({ recipe }: { recipe: RecipeDetail }) {
   const baseServings = recipe.servings;
   const [servings, setServings] = useState(baseServings);
+  const [draft, setDraft] = useState(String(baseServings));
   const factor = servings / baseServings;
+
+  function apply(n: number) {
+    const clamped = Math.min(99, Math.max(1, n));
+    setServings(clamped);
+    setDraft(String(clamped));
+  }
 
   const scaledIngredients = useMemo(
     () =>
@@ -39,7 +46,7 @@ export function RecipeBody({ recipe }: { recipe: RecipeDetail }) {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setServings((s) => Math.max(1, s - 1))}
+            onClick={() => apply(servings - 1)}
             className="h-8 w-8 rounded-md border bg-background text-sm hover:bg-secondary"
             aria-label="Decrease servings"
           >
@@ -50,16 +57,23 @@ export function RecipeBody({ recipe }: { recipe: RecipeDetail }) {
             type="number"
             min={1}
             max={99}
-            value={servings}
+            value={draft}
             onChange={(e) => {
-              const n = parseInt(e.target.value, 10);
+              const raw = e.target.value;
+              setDraft(raw);
+              if (raw === "") return;
+              const n = parseInt(raw, 10);
               if (Number.isFinite(n) && n >= 1 && n <= 99) setServings(n);
+            }}
+            onBlur={() => {
+              const n = parseInt(draft, 10);
+              apply(Number.isFinite(n) ? n : servings);
             }}
             className="h-8 w-14 rounded-md border bg-background text-center text-sm"
           />
           <button
             type="button"
-            onClick={() => setServings((s) => Math.min(99, s + 1))}
+            onClick={() => apply(servings + 1)}
             className="h-8 w-8 rounded-md border bg-background text-sm hover:bg-secondary"
             aria-label="Increase servings"
           >
@@ -69,7 +83,7 @@ export function RecipeBody({ recipe }: { recipe: RecipeDetail }) {
         {servings !== baseServings && (
           <button
             type="button"
-            onClick={() => setServings(baseServings)}
+            onClick={() => apply(baseServings)}
             className="text-xs underline text-muted-foreground hover:text-foreground"
           >
             Reset to {baseServings}
