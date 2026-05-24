@@ -25,6 +25,17 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: /recipes list page (server component)
+- `app/recipes/page.tsx` — server component, reads `searchParams` (Promise in Next 15), calls `getRecipes(query)`. Parses query string params back into typed `RecipeQuery` (split comma lists, narrow `difficulty`/`sort`/`order` enums).
+- `components/recipe-card.tsx` — title, description, difficulty pill (colored by easy/medium/hard), prep/cook/servings line, tag badges. Whole card is a `<Link>` to `/recipes/[id]`.
+- `components/ui/card.tsx` + `components/ui/badge.tsx` — shadcn primitives written inline (avoids the interactive shadcn CLI prompt).
+- `lib/format.ts` — `difficultyStyles` map for the pill colors.
+- `app/recipes/loading.tsx` — pulsing skeleton grid for Suspense fallback.
+- `app/recipes/error.tsx` — client error boundary with `reset()` button.
+- Empty state: dashed border card "No recipes match your filters."
+- Result count rendered in the header ("15 recipes").
+- Verified end-to-end against both servers running: root redirects to `/recipes`, list renders all 15 alphabetized, `?q=pasta` narrows to 3, `?q=nothingmatches` shows empty state.
+
 ### Commit: frontend typed API client
 - `lib/api.ts` exposes:
   - `getRecipes(query?)`: list with optional `q`, `tags`, `ingredients`, `diet`, `difficulty`, `sort`, `order`. Query encoded as comma-separated values.
