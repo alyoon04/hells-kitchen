@@ -25,6 +25,16 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: polish (loading, errors, not-found, env loading)
+- Backend: added `import "dotenv/config"` at top of `server.ts` so `backend-app/.env` is loaded automatically on `npm run dev` / `start`. Previously the LLM key only worked if exported in shell env.
+- Frontend:
+  - `app/cook/loading.tsx` — skeleton matching cook page layout (header + ingredient pill placeholders).
+  - `app/cook/error.tsx` — client error boundary with retry + back-to-recipes buttons.
+  - `app/not-found.tsx` — root-level 404 for any unmatched path (vs. the route-scoped `app/recipes/[id]/not-found.tsx` which only fires from `notFound()` calls).
+  - `components/recipe-body.tsx` — added `flex-wrap` to scaling controls so they don't overflow on narrow screens.
+- Mobile pass: confirmed key layouts collapse cleanly — filter bar (single col under `sm`), recipe grid (single col under `sm`), detail page (stacks under `md`). No additional changes needed beyond the scaling controls wrap.
+- Verified: `/nonsense` renders root 404, `/` redirects to `/recipes`, `/cook` loads.
+
 ### Commit: LLM "cook from pantry" feature
 - Backend:
   - Installed `@anthropic-ai/sdk`.

@@ -32,7 +32,7 @@ export function RecipeBody({ recipe }: { recipe: RecipeDetail }) {
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         <label htmlFor="servings" className="text-sm font-medium">
           Servings:
         </label>
