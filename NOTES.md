@@ -24,6 +24,19 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: GET /api/recipes with search + filter + sort
+- New `src/services/recipes.ts` with `searchRecipes(query)`:
+  - `q`: case-insensitive substring match on `title + description`.
+  - `tags`: AND semantics — recipe must include ALL specified tags.
+  - `ingredients`: AND semantics — recipe must include ALL specified ingredient IDs.
+  - `diet`: strict — every ingredient in the recipe must have the diet flag in its `dietary` array (so a recipe is "vegan" iff every ingredient is marked vegan). AND semantics across multiple diet flags.
+  - `difficulty`: exact match.
+  - `sort`: `title | prepTime | cookTime | difficulty | dateAdded`. PrepTime/cookTime parsed via `parseInt`. Difficulty uses custom order (easy < medium < hard).
+  - `order`: asc | desc (default asc).
+- Filter accepts query params in single (`tags=italian`), comma (`tags=italian,pasta`), or repeated-param (`tags=italian&tags=pasta`) form thanks to the `RecipeQuerySchema` transform.
+- Server wires `RecipeQuerySchema.safeParse(req.query)`; on validation failure returns `400 { error: { code: 'INVALID_QUERY', message, details } }`. Centralized middleware comes in commit 8.
+- Verified against all required filters + an invalid difficulty (returns 400).
+
 ### Commit: backend in-memory repository
 - `backend-app/src/db/repository.ts`:
   - Loads `data.json` once at boot via `fs.readFileSync`.
