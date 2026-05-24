@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -32,7 +33,18 @@ export default async function RecipeDetailPage({
         ← Back to recipes
       </Link>
 
-      <header className="mt-4 mb-8">
+      <div className="relative mt-4 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border/40 bg-secondary">
+        <Image
+          src={recipe.image}
+          alt={recipe.title}
+          fill
+          sizes="(max-width: 1024px) 100vw, 1024px"
+          className="object-cover"
+          priority
+        />
+      </div>
+
+      <header className="mt-6 mb-8">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-bold tracking-tight">{recipe.title}</h1>
           <div className="flex items-center gap-2 shrink-0">

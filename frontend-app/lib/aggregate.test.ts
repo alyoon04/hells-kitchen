@@ -14,6 +14,7 @@ function recipe(
     id,
     title,
     description: "",
+    image: "https://placehold.co/800x450",
     servings: 1,
     prepTime: "1 minutes",
     cookTime: "1 minutes",

@@ -25,6 +25,7 @@ export const RecipeSummarySchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
+  image: z.string().min(1),
   servings: z.number(),
   prepTime: z.string(),
   cookTime: z.string(),

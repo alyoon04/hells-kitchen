@@ -177,6 +177,7 @@ export function getRecipeDetail(id: string): RecipeDetail {
     id: recipe.id,
     title: recipe.title,
     description: recipe.description,
+    image: recipe.image,
     servings: recipe.servings,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,

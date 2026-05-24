@@ -27,6 +27,7 @@ const recipe: Recipe = {
   id: "1",
   title: "Test Pizza",
   description: "Test",
+  image: "https://placehold.co/800x450",
   servings: 3,
   prepTime: "10 minutes",
   cookTime: "15 minutes",
