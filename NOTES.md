@@ -25,6 +25,17 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Commit: frontend typed API client
+- `lib/api.ts` exposes:
+  - `getRecipes(query?)`: list with optional `q`, `tags`, `ingredients`, `diet`, `difficulty`, `sort`, `order`. Query encoded as comma-separated values.
+  - `getRecipe(id)`: detail.
+  - `getIngredients()`: full lookup table.
+  - `getTags()`: sorted unique tag list.
+- All responses Zod-validated client-side against the schemas in `lib/types.ts` (defensive against backend drift).
+- `ApiError(status, code, message)` thrown on non-2xx; parses backend's `{ error: { code, message } }` envelope.
+- Uses `cache: "no-store"` so dev edits show up immediately. Can revisit for prod caching strategy later.
+- Single env var: `NEXT_PUBLIC_API_URL` (default `http://localhost:8080`) — works in both server and client components. Dropped the redundant private `API_URL`.
+
 ### Commit: backend error middleware + centralized validation
 - New `src/errors.ts` defines the error hierarchy:
   - `HttpError` (base; carries `status`, `code`, `message`).
