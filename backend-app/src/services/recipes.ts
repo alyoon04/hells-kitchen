@@ -17,6 +17,10 @@ const DIFFICULTY_ORDER: Record<Recipe["difficulty"], number> = {
   hard: 2,
 };
 
+const RESTRICTION_DIETS = new Set(["vegan", "vegetarian", "gluten-free"]);
+const HIGH_PROTEIN_GRAMS_PER_SERVING = 20;
+const KETO_MAX_CARBS_PER_SERVING = 10;
+
 function parseMinutes(s: string): number {
   const n = parseInt(s, 10);
   return Number.isFinite(n) ? n : 0;
@@ -53,6 +57,24 @@ function scaleNutrition(n: Nutrition, factor: number): Nutrition {
   };
 }
 
+function matchesDiet(recipe: Recipe, dietFlag: string): boolean {
+  if (RESTRICTION_DIETS.has(dietFlag)) {
+    return recipe.tags.includes(dietFlag);
+  }
+  if (dietFlag === "high-protein") {
+    return (
+      computePerServingNutrition(recipe).protein >=
+      HIGH_PROTEIN_GRAMS_PER_SERVING
+    );
+  }
+  if (dietFlag === "keto") {
+    return (
+      computePerServingNutrition(recipe).carbs <= KETO_MAX_CARBS_PER_SERVING
+    );
+  }
+  return recipe.tags.includes(dietFlag);
+}
+
 function matchesQuery(recipe: Recipe, query: RecipeQuery): boolean {
   const q = query.q?.toLowerCase().trim();
   if (q) {
@@ -79,13 +101,7 @@ function matchesQuery(recipe: Recipe, query: RecipeQuery): boolean {
   }
 
   if (query.diet.length > 0) {
-    const everyIngredientSatisfiesEveryDiet = query.diet.every((dietFlag) =>
-      recipe.ingredients.every((ri) => {
-        const ing = repository.getIngredient(ri.ingredientId);
-        return ing?.dietary.includes(dietFlag) ?? false;
-      }),
-    );
-    if (!everyIngredientSatisfiesEveryDiet) return false;
+    if (!query.diet.every((d) => matchesDiet(recipe, d))) return false;
   }
 
   return true;
@@ -137,11 +153,8 @@ const ZERO_NUTRITION: Nutrition = {
   fat: 0,
 };
 
-export function getRecipeDetail(id: string): RecipeDetail {
-  const recipe = repository.getRecipeById(id);
-  if (!recipe) throw new NotFoundError(`Recipe not found: ${id}`);
-
-  const hydrated: HydratedIngredient[] = recipe.ingredients.map((ri) => {
+function hydrateIngredients(recipe: Recipe): HydratedIngredient[] {
+  return recipe.ingredients.map((ri) => {
     const ing = repository.getIngredient(ri.ingredientId);
     if (!ing) {
       return {
@@ -166,7 +179,24 @@ export function getRecipeDetail(id: string): RecipeDetail {
       nutrition: ing.nutrition,
     };
   });
+}
 
+function computeTotalNutrition(recipe: Recipe): Nutrition {
+  return hydrateIngredients(recipe).reduce(
+    (acc, h) => addNutrition(acc, h.nutrition),
+    { ...ZERO_NUTRITION },
+  );
+}
+
+function computePerServingNutrition(recipe: Recipe): Nutrition {
+  return scaleNutrition(computeTotalNutrition(recipe), 1 / recipe.servings);
+}
+
+export function getRecipeDetail(id: string): RecipeDetail {
+  const recipe = repository.getRecipeById(id);
+  if (!recipe) throw new NotFoundError(`Recipe not found: ${id}`);
+
+  const hydrated = hydrateIngredients(recipe);
   const totalRaw = hydrated.reduce(
     (acc, h) => addNutrition(acc, h.nutrition),
     { ...ZERO_NUTRITION },

@@ -109,37 +109,34 @@ Good luck! We're excited to see your implementation.
 - **LLM uses Claude Haiku 4.5** with a strict JSON system prompt. Output is validated against a Zod schema, then `recipeId`s are hydrated to `RecipeSummary` server-side before the response goes out.
 
 ### Completed features
-- ✅ `/recipes` list with all recipes, search by name, filter by tags / ingredients / diet / difficulty, sort by title / prepTime / cookTime / difficulty / dateAdded (asc/desc).
-- ✅ `/recipes/:id` detail with hydrated ingredients (name + amount + unit), instructions, tags, nutrition per serving + total.
-- ✅ Dietary restriction filter (vegan, vegetarian, gluten-free, keto, high-protein).
-- ✅ Nutrition calculator (per-serving + total), driven from ingredient lookup.
-- ✅ Recipe scaling (servings slider on detail page — scales ingredient amounts + nutrition total in real time, including fractional amounts like `1/3`).
-- ✅ Sorting options.
-- ✅ LLM "Cook from pantry" — pick ingredients you have, Claude ranks recipes with reasoning.
-- ✅ LLM "Smart search" on `/recipes` — type a natural-language query like *"quick vegan italian"* and Claude returns structured filter params that get applied to the URL.
-- ✅ TypeScript throughout (strict mode), Zod-validated request/response shapes.
-- ✅ Loading skeletons, error boundaries, empty states, root + route-scoped 404s.
-- ✅ Responsive layout (cards stack on mobile, detail grid collapses, scaling controls wrap).
-- ✅ Vitest test suite (40 tests) covering `searchRecipes`, `getRecipeDetail`, `scaleAmount`, and `aggregateIngredients` — run with `npm test` in either app.
-- ✅ Favorites (`/favorites`) — heart toggle on every card and on detail pages; persisted in `localStorage`, synced across tabs + same-tab components.
-- ✅ Shopping list (`/shopping-list`) — basket toggle on every card; aggregates ingredients across selected recipes (groups by ingredient + unit, sums numeric amounts, lists non-numeric like "pinch" separately).
+- `/recipes` list with all recipes, search by name, filter by tags / ingredients / diet / difficulty, sort by title / prepTime / cookTime / difficulty / dateAdded (asc/desc).
+- `/recipes/:id` detail with hydrated ingredients (name + amount + unit), instructions, tags, nutrition per serving + total.
+- Dietary restriction filter (vegan, vegetarian, gluten-free, keto, high-protein).
+- Nutrition calculator (per-serving + total), driven from ingredient lookup.
+- Recipe scaling (servings slider on detail page — scales ingredient amounts + nutrition total in real time, including fractional amounts like `1/3`).
+- Sorting options.
+- LLM "Cook from pantry" — pick ingredients you have, Claude ranks recipes with reasoning.
+- LLM "Smart search" on `/recipes` — type a natural-language query like *"quick vegan italian"* and Claude returns structured filter params that get applied to the URL.
+- TypeScript throughout (strict mode), Zod-validated request/response shapes.
+- Loading skeletons, error boundaries, empty states, root + route-scoped 404s.
+- Responsive layout (cards stack on mobile, detail grid collapses, scaling controls wrap).
+- Vitest test suite (40 tests) covering `searchRecipes`, `getRecipeDetail`, `scaleAmount`, and `aggregateIngredients` — run with `npm test` in either app.
+- Favorites (`/favorites`) — heart toggle on every card and on detail pages; persisted in `localStorage`, synced across tabs + same-tab components.
+- Shopping list (`/shopping-list`) — basket toggle on every card; aggregates ingredients across selected recipes (groups by ingredient + unit, sums numeric amounts, lists non-numeric like "pinch" separately).
 
 ### Assumptions
 - **Nutrition portion**: `data.json` doesn't specify a portion unit on nutrition values. We sum nutrition across the recipe's ingredients (1 entry per ingredient), then divide by `servings` for per-serving. We don't multiply by `amount` because units are heterogeneous (cups / leaves / tbsp / oz).
-- **Missing ingredient lookups**: 8 ingredient IDs are referenced by recipes but not defined in the lookup table (`basil`, `butter`, `brown_sugar`, `white_sugar`, `broccoli`, `carrot`, `soy_sauce`, `ginger`). They render with a humanized name + zero nutrition, so the recipe still shows but per-serving totals are slightly understated. A boot warning lists them.
 - **Multi-select semantics**: tags / ingredients / diet filters use AND (recipe must match ALL selected values).
-- **Diet=vegan** means EVERY ingredient in the recipe lists "vegan" in its `dietary` array. Recipes with a missing-lookup ingredient (zero dietary metadata) won't pass this filter.
+- **Diet filter splits by type.** Restriction diets (`vegan`, `vegetarian`, `gluten-free`) match against `recipe.tags` — author intent is authoritative. Macro diets are computed from per-serving nutrition: `high-protein` ≥ 20g protein/serving, `keto` ≤ 10g carbs/serving.
 
 ### Known limitations
 - **CORS is permissive** (`cors()` with defaults). Fine for the demo; would lock down to the deployed frontend origin in production.
-- **Ingredient filter chips on `/recipes` don't show the 8 missing-from-lookup ingredients** (can still filter via URL param if you know the id).
 - **Non-numeric ingredient amounts** (e.g., "pinch") would scale as `pinch ×1.5`. None in the current dataset, but the fallback is documented in `lib/scaling.ts`.
 - **Shopping list uses each recipe's base servings**, not any per-recipe scaling you set on the detail page (the slider is component-local state, not persisted).
-- **No images** in the dataset; cards have no image. Placeholders would be a quick add.
+- **Macro filter thresholds are fixed** (20g protein / 10g carbs per serving). A user-adjustable slider would be a natural next step.
 
 ### With more time
 - Per-recipe scaling carried into the shopping list (persist the chosen servings, then multiply amounts before aggregating).
-- Recipe images (Unsplash by tag).
 - LLM: streaming response, "find more like this" on a recipe page.
 - Tighten CORS to the deployed frontend origin only.
 - Real DB if the dataset grew (Postgres + Drizzle).

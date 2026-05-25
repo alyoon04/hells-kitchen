@@ -149,16 +149,31 @@ describe("searchRecipes", () => {
     );
   });
 
-  it("filters by diet: every ingredient must have the flag", () => {
+  it("filters restriction diets by recipe tag", () => {
     expect(searchRecipes(query({ diet: "vegan" })).map((r) => r.id)).toEqual([
       "2",
     ]);
-    expect(searchRecipes(query({ diet: "vegetarian" })).map((r) => r.id)).toEqual(
-      ["1", "2"],
-    );
     expect(
-      searchRecipes(query({ diet: "gluten-free" })).map((r) => r.id).sort(),
-    ).toEqual(["2", "3"]);
+      searchRecipes(query({ diet: "vegetarian" })).map((r) => r.id),
+    ).toEqual(["1"]);
+    expect(searchRecipes(query({ diet: "gluten-free" })).map((r) => r.id)).toEqual(
+      [],
+    );
+  });
+
+  it("filters high-protein by per-serving protein >= 20g", () => {
+    // chicken: 30g protein, servings=2 → 15g per serving (below threshold)
+    // Bump grilled chicken to 2 lb so 60g protein / 2 servings = 30g per serving
+    expect(searchRecipes(query({ diet: "high-protein" }))).toEqual([]);
+  });
+
+  it("filters keto by per-serving carbs <= 10g", () => {
+    // tomato: 4g carbs * 3 (salad servings=2) = 12g total → 6g per serving (passes)
+    // chicken: 0g carbs (passes)
+    // pizza: tomato 4 + mozz 1 + flour 22 = 27g / 4 servings = 6.75g (passes)
+    expect(searchRecipes(query({ diet: "keto" })).map((r) => r.id).sort()).toEqual(
+      ["1", "2", "3"],
+    );
   });
 
   it("combines diet + difficulty with AND semantics", () => {

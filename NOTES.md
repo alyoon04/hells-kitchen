@@ -25,6 +25,22 @@ A running log of notable decisions and changes. Source of truth for context acro
 
 ## Implementation log
 
+### Session: diet filter overhaul + ingredient lookup backfill
+- Replaced the diet filter logic in `services/recipes.ts`. Old behavior required every ingredient in a recipe to carry the diet flag, which (a) silently rejected any recipe containing a missing-from-lookup ingredient (empty `dietary` array), and (b) made `high-protein` impossible to satisfy — salt, oil, spices are never tagged high-protein.
+- New behavior splits by diet type:
+  - Restriction diets (`vegan`, `vegetarian`, `gluten-free`) → match against `recipe.tags`. Author asserts intent. Mirrors how real recipe sites (NYT Cooking, Serious Eats) handle it.
+  - Macro diets → derived from per-serving nutrition. `high-protein` = ≥20g protein/serving; `keto` = ≤10g carbs/serving. Thresholds are constants at the top of the file.
+- Extracted `hydrateIngredients()` and `computePerServingNutrition()` helpers so both `searchRecipes` (for the macro filter) and `getRecipeDetail` (for the response payload) share the same nutrition computation.
+- Backfilled diet tags on 8 recipes in `data.json` so the new restriction logic returns sensible results: +vegetarian on Chocolate Chip Cookies / Indian Curry / Quinoa Bowl; +vegan on Stir-Fried Tofu; +gluten-free on Beef Tacos / Greek Salad / Sushi / Indian Curry / Quinoa Bowl / Grilled Salmon.
+- Backfilled all 8 missing ingredient lookup entries (`basil`, `butter`, `brown_sugar`, `white_sugar`, `broccoli`, `carrot`, `soy_sauce`, `ginger`) with realistic per-typical-use nutrition values and dietary flags. Without these, the macro filters were gamed by zero-nutrition placeholders — Chocolate Chip Cookies appeared as keto-friendly because flour/butter/sugars contributed 0 carbs. Boot warning for missing IDs now stays silent.
+- `recipes.test.ts`: replaced the "every ingredient must qualify" test with a tag-based diet test, plus separate threshold tests for high-protein and keto. 14 backend tests pass.
+
+### Session: landing page + nav + recipe image path fixes
+- Replaced the root redirect (`/` → `/recipes`) with a real landing page in `app/page.tsx`. Hero section, "Hell's Kitchen" title, CTA to `/recipes`, feature cards below the fold. Image lives at `/hero.jpg`. The page was subsequently restyled by the user (Instrument Serif typography, two-tone "Beyond the recipe, we cook the unforgettable" copy, fade-rise animations).
+- Header (`app/layout.tsx`): added a clickable "Hell's Kitchen" brand on the left as the way back home. Nav is absolutely centered on desktop (an earlier attempt with grid columns squeezed the nav into 1/3 width); stacks centered on mobile.
+- Recipe image paths in `data.json` were referencing files that didn't exist on disk. The `public/recipes/` filenames used `.jpg` but `data.json` pointed at `.jpeg`; almond-crusted was named `almond-crusted.jpg` on disk but `almond-crusted-chicken.jpeg` in data. Fixed 4 mismatches. Later changed quinoa pointer to `/recipes/quinoa.jpg` after the user dropped in a new image.
+- Removed the 14 checkmark emojis from the README "Completed features" list (user-facing prose, no functional change).
+
 ### Commit: LLM natural-language filter (Smart search)
 - Backend `POST /api/parse-query` ({ text }) → `ParsedQuery` (all fields optional). Calls Claude Haiku 4.5 with a strict-JSON system prompt + a `cache_control: ephemeral` block holding the full allowed vocabulary (tags, ingredient {id,name}, diets, difficulties, sorts). Heuristics in the prompt: "quick"/"fast" → sort=prepTime asc, "easy" → difficulty=easy, etc.
 - `services/parse-query.ts` also runs a defensive `sanitize()` pass that drops any tags/ingredients/diets not in the allowed set — so a model hallucination can't poison the filter URL.

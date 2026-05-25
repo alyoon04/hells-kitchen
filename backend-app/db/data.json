@@ -94,7 +94,8 @@
       "tags": [
         "dessert",
         "baking",
-        "crowd-pleaser"
+        "crowd-pleaser",
+        "vegetarian"
       ],
       "dateAdded": "2024-02-01T15:45:00Z",
       "image": "/recipes/chocolate-chip.jpg"
@@ -194,7 +195,8 @@
       "tags": [
         "mexican",
         "dinner",
-        "family"
+        "family",
+        "gluten-free"
       ],
       "dateAdded": "2024-02-20T19:15:00Z",
       "image": "/recipes/Beef-Tacos.webp"
@@ -244,7 +246,8 @@
       "tags": [
         "greek",
         "vegetarian",
-        "salad"
+        "salad",
+        "gluten-free"
       ],
       "dateAdded": "2024-02-25T12:00:00Z",
       "image": "/recipes/greek-salad.avif"
@@ -294,7 +297,8 @@
       "tags": [
         "japanese",
         "seafood",
-        "dinner"
+        "dinner",
+        "gluten-free"
       ],
       "dateAdded": "2024-03-01T14:30:00Z",
       "image": "/recipes/sushi-roll.jpg"
@@ -344,7 +348,9 @@
       "tags": [
         "indian",
         "vegan",
-        "spicy"
+        "spicy",
+        "vegetarian",
+        "gluten-free"
       ],
       "dateAdded": "2024-03-05T16:45:00Z",
       "image": "/recipes/vegetable-curry.jpg"
@@ -494,7 +500,9 @@
       "tags": [
         "vegan",
         "healthy",
-        "lunch"
+        "lunch",
+        "vegetarian",
+        "gluten-free"
       ],
       "dateAdded": "2024-03-20T11:30:00Z",
       "image": "/recipes/quinoa.jpg"
@@ -577,7 +585,8 @@
       "tags": [
         "vegetarian",
         "asian",
-        "healthy"
+        "healthy",
+        "vegan"
       ],
       "dateAdded": "2024-03-26T14:15:00Z",
       "image": "/recipes/stir-fried-tofu.jpg"
@@ -627,7 +636,8 @@
       "tags": [
         "seafood",
         "healthy",
-        "dinner"
+        "dinner",
+        "gluten-free"
       ],
       "dateAdded": "2024-03-27T18:30:00Z",
       "image": "/recipes/grilled-salmon.jpg"
@@ -1479,6 +1489,145 @@
       "commonAllergens": [],
       "dietary": [
         "vegan",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "basil",
+      "name": "Fresh Basil",
+      "category": "herb",
+      "nutrition": {
+        "calories": 5,
+        "protein": 0.5,
+        "carbs": 1,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": [
+        "vegan",
+        "vegetarian",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "butter",
+      "name": "Butter",
+      "category": "dairy",
+      "nutrition": {
+        "calories": 400,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 45
+      },
+      "commonAllergens": [
+        "dairy"
+      ],
+      "dietary": [
+        "vegetarian",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "brown_sugar",
+      "name": "Brown Sugar",
+      "category": "sweetener",
+      "nutrition": {
+        "calories": 830,
+        "protein": 0,
+        "carbs": 215,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": [
+        "vegan",
+        "vegetarian",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "white_sugar",
+      "name": "White Sugar",
+      "category": "sweetener",
+      "nutrition": {
+        "calories": 775,
+        "protein": 0,
+        "carbs": 200,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": [
+        "vegan",
+        "vegetarian",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "broccoli",
+      "name": "Broccoli",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 30,
+        "protein": 2.5,
+        "carbs": 6,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": [
+        "vegan",
+        "vegetarian",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 25,
+        "protein": 0.5,
+        "carbs": 6,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": [
+        "vegan",
+        "vegetarian",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "soy_sauce",
+      "name": "Soy Sauce",
+      "category": "condiment",
+      "nutrition": {
+        "calories": 10,
+        "protein": 2,
+        "carbs": 1,
+        "fat": 0
+      },
+      "commonAllergens": [
+        "soy",
+        "gluten"
+      ],
+      "dietary": [
+        "vegan",
+        "vegetarian"
+      ]
+    },
+    {
+      "id": "ginger",
+      "name": "Fresh Ginger",
+      "category": "spice",
+      "nutrition": {
+        "calories": 5,
+        "protein": 0,
+        "carbs": 1,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": [
+        "vegan",
+        "vegetarian",
         "gluten-free"
       ]
     }
